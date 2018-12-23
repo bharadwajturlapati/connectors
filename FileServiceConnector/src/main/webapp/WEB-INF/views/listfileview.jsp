@@ -11,20 +11,63 @@
 <script
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script>
-	function loadData() {
+	function loadData(){
 		var payload = {
 			"path" : "E:\\apache-tomcat-8.5.20\\webapps"
 		};
-		var data = new FormData();
-		data.append("json", JSON.stringify(payload));
+		
 		fetch("/services/api/v1/getcontents", {
 			method : "POST",
-			body : data
+			headers: new Headers({'Content-Type': 'application/json'}),
+			body : JSON.stringify(payload)
 		}).then(function(res) {
 			return res.json();
 		}).then(function(data) {
-			filldata(data["paths"]);
-		})
+			filldata(data["newInstance"]["paths"]);
+		});
+	}
+	
+	function loadData2(){
+		var domNode = document.getElementById("tablebody");
+		domNode.innerText="";
+		domNode.innerHTML= "";
+		var path = event.target.getAttribute("filepath");
+		var payload = {
+			"path" : path
+		};
+		
+		fetch("/services/api/v1/getcontents", {
+			method : "POST",
+			headers: new Headers({'Content-Type': 'application/json'}),
+			body : JSON.stringify(payload)
+		}).then(function(res) {
+			return res.json();
+		}).then(function(data) {
+			filldata(data["newInstance"]["paths"]);
+		});
+	}
+	
+	function downloadFile(){
+		var path = event.target.getAttribute("filepath");
+		var filename = event.target.getAttribute("filename");
+		var payload = {
+			"path" : path
+ 		};
+		fetch("/services/api/v1/downloadfile", {
+			method : "POST",
+			headers: new Headers({'Content-Type': 'application/json'}),
+			body : JSON.stringify(payload)
+		}).then(function(res) {
+			return res.blob();
+		}).then(function(blob) {
+			var url = window.URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();    
+            a.remove();
+		});
 	}
 	
 	function filldata(jsondata){
@@ -39,8 +82,11 @@
 			tr.append(td2);
 			var td3 = document.createElement("td");
 			if(jsondata[index].fileType == "file"){
-				td3.innerText = "Download";
+				td3.innerHTML = "<button filename='"+jsondata[index].fileName+"' filepath='"+jsondata[index].filePath+"' onclick='downloadFile()'>Download</button>";
+			} else if(jsondata[index].fileType == "dir"){
+				td3.innerHTML = "<button filepath='"+jsondata[index].filePath+"' onclick='loadData2()'>Open Dir</button>";
 			}
+				
 			tr.append(td3);
 			domNode.append(tr);
 		}

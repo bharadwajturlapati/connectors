@@ -1,5 +1,6 @@
 package com.company.fileservice.controller;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
@@ -26,7 +27,9 @@ public class FileServiceController {
 	private static final Logger LOGGER = LogManager.getLogger(FileServiceController.class);
 
 	@RequestMapping(value = "/viewcontents", method = RequestMethod.GET)
-	public ModelAndView viewcontents() {
+	public ModelAndView viewcontents(ModelMap modelMap, HttpServletRequest request) {
+		String rootPath = System.getProperty("FILE_ROOT_FOLDER");
+		modelMap.addAttribute("rootpath", rootPath);
 		return new ModelAndView("listfileview");
 	}
 
@@ -34,7 +37,7 @@ public class FileServiceController {
 	@ResponseBody
 	public String getContents(@RequestBody GetContents payloadObj, ModelMap modelMap) {
 		LOGGER.debug("Fetching contents in a folder.");
-		return handler.getcontents(payloadObj.getPath());
+		return handler.getcontents(payloadObj.getPath(), false);
 	}
 
 	@RequestMapping(value = "/downloadfile", method = RequestMethod.POST)

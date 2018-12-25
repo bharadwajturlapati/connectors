@@ -12,14 +12,13 @@
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script>
 	function loadData(){
-		var payload = {
-			"path" : "E:\\apache-tomcat-8.5.20\\webapps"
-		};
-		
-		fetch("/services/api/v1/getcontents", {
-			method : "POST",
-			headers: new Headers({'Content-Type': 'application/json'}),
-			body : JSON.stringify(payload)
+		var url = "/services/api/v2/getcontents";
+		var currentURL = window.location.href;
+		if(!(currentURL.endsWith("/services/api/v2/viewcontents")|| currentURL.endsWith("/services/api/v2/viewcontents/"))){
+			url = url+"${rootpath}";
+		}
+		fetch(url, {
+			method : "GET",
 		}).then(function(res) {
 			return res.json();
 		}).then(function(data) {
@@ -28,23 +27,8 @@
 	}
 	
 	function loadData2(){
-		var domNode = document.getElementById("tablebody");
-		domNode.innerText="";
-		domNode.innerHTML= "";
 		var path = event.target.getAttribute("filepath");
-		var payload = {
-			"path" : path
-		};
-		
-		fetch("/services/api/v1/getcontents", {
-			method : "POST",
-			headers: new Headers({'Content-Type': 'application/json'}),
-			body : JSON.stringify(payload)
-		}).then(function(res) {
-			return res.json();
-		}).then(function(data) {
-			filldata(data["newInstance"]["paths"]);
-		});
+		window.location.href = "/services/api/v2/viewcontents"+path;
 	}
 	
 	function downloadFile(){

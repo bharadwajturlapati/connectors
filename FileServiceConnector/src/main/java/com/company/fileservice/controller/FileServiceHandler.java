@@ -27,17 +27,19 @@ public class FileServiceHandler {
 	private static final Gson GSON = new GsonBuilder().create();
 	private static final Logger LOGGER = LogManager.getLogger(FileServiceHandler.class);
 
-	public String getcontents(String path) {
+	public String getcontents(String path, boolean unixStyle) {
 		LOGGER.debug("Fetching contents from the path {}", path);
-		return GSON.toJson(getFirstLevelContents(path),
+		return GSON.toJson(getFirstLevelContents(path, unixStyle),
 				new TypeToken<FileServiceOperationsResponse<FileServiceGetContentsResponse>>() {
 				}.getType());
 	}
 
-	public FileServiceOperationsResponse<FileServiceGetContentsResponse> getFirstLevelContents(String path) {
+	public FileServiceOperationsResponse<FileServiceGetContentsResponse> getFirstLevelContents(String path, boolean unixStyle) {
 		List<FileMetadata> listOfFileMetadata = new ArrayList<>();
 		FileServiceOperationsResponse<FileServiceGetContentsResponse> response = new FileServiceOperationsResponse<>(
 				new FileServiceGetContentsResponse());
+		
+		String mountPath = System.getProperty("FILE_ROOT_FOLDER");
 
 		if (checkPathInput(path)) {
 			response.setOpstatus(ResponseOpStatus.GENERIC_EXCEPTION.getStatus());
@@ -48,7 +50,14 @@ public class FileServiceHandler {
 			lazyPath.forEach(eachpath -> {
 				FileMetadata metadata = new FileMetadata();
 				metadata.setFileName(eachpath.getFileName().toString());
-				metadata.setFilePath(eachpath.toString());
+				String assetPath = eachpath.toString();
+				if(unixStyle) {
+					String unixStylePath = assetPath.replaceAll("\\\\", "/");
+					String relativePath = unixStylePath.split(mountPath)[1];
+					metadata.setFilePath(relativePath);
+				} else {
+					metadata.setFilePath(eachpath.toString());
+				}
 				metadata.setFileType(Files.isDirectory(eachpath) ? "dir" : "file");
 				listOfFileMetadata.add(metadata);
 			});

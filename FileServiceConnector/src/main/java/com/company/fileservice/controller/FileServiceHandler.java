@@ -34,11 +34,12 @@ public class FileServiceHandler {
 				}.getType());
 	}
 
-	public FileServiceOperationsResponse<FileServiceGetContentsResponse> getFirstLevelContents(String path, boolean unixStyle) {
+	public FileServiceOperationsResponse<FileServiceGetContentsResponse> getFirstLevelContents(String path,
+			boolean unixStyle) {
 		List<FileMetadata> listOfFileMetadata = new ArrayList<>();
 		FileServiceOperationsResponse<FileServiceGetContentsResponse> response = new FileServiceOperationsResponse<>(
 				new FileServiceGetContentsResponse());
-		
+
 		String mountPath = System.getProperty("FILE_ROOT_FOLDER");
 
 		if (checkPathInput(path)) {
@@ -51,7 +52,7 @@ public class FileServiceHandler {
 				FileMetadata metadata = new FileMetadata();
 				metadata.setFileName(eachpath.getFileName().toString());
 				String assetPath = eachpath.toString();
-				if(unixStyle) {
+				if (unixStyle) {
 					String unixStylePath = assetPath.replaceAll("\\\\", "/");
 					String relativePath = unixStylePath.split(mountPath)[1];
 					metadata.setFilePath(relativePath);
